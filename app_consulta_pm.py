@@ -2,43 +2,62 @@
 import streamlit as st
 import pandas as pd
 
-# --- CONFIGURACIÓN ---
-st.set_page_config(page_title="Consulta PM", page_icon="💰")
-
-st.title("Consulta tus PM 💰")
-st.markdown("Ingresá tu nombre y contraseña para ver cuántas PM tenés.")
-st.markdown("**(La contraseña es tu nombre sin espacios + 'papu', todo en minúscula)**")
-
-# --- CARGA DE DATOS DESDE GOOGLE SHEETS ---
-@st.cache_data(ttl=300)
+@st.cache_data
 def cargar_datos():
-    url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ-uF9T7oQnnVw1wCzq4pUJ8ZoUsj1PdkZTuUeUxqVaKft2kiyqiyMVRwK2SRknD1zAIP3KaJwJKhzF/pub?output=csv"
+    url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS1L2nRoYBYQPyZXJdhDk0xehT-8fPE1w8pI1T1lZOd84rqdZauUjVo3aEExKYKTD20TOJVvBiC_lza/pub?gid=470759668&single=true&output=csv"
     df = pd.read_csv(url)
-    df.columns = df.columns.str.strip()
+    df.columns = [col.strip() for col in df.columns]
     return df
 
 df = cargar_datos()
 
-# --- FORMULARIO DE LOGIN ---
-with st.form("login"):
-    nombre_ingresado = st.text_input("Nombre").strip()
-    password_ingresado = st.text_input("Contraseña", type="password")
-    submit = st.form_submit_button("Consultar")
+st.title("Consulta tus PM 💰")
+st.markdown("Ingresá tu nombre y contraseña para ver cuántas PM tenés.")
+st.markdown("**(La contraseña es la que figura en el Excel)**")
 
-if submit:
-    if nombre_ingresado == "":
-        st.warning("Ingresá tu nombre.")
-    else:
-        nombre_normalizado = nombre_ingresado.replace(" ", "").lower()
-        contraseña_esperada = nombre_normalizado + "papu"
+nombre_input = st.text_input("Tu nombre (respetá mayúsculas/minúsculas):")
+password_input = st.text_input("Contraseña:", type="password")
 
-        if password_ingresado.lower() != contraseña_esperada:
-            st.error("Contraseña incorrecta.")
+if st.button("Consultar"):
+    user_row = df[df['Nombre'] == nombre_input]
+
+    if not user_row.empty:
+        password_real = user_row.iloc[0]['Contraseña']
+        if password_input == password_real:
+            pm = user_row.iloc[0]['PM Totales']
+            st.success(f"Tenés {pm} PM 💸")
         else:
-            # Buscar en la tabla
-            fila = df[df["Nombre"].str.strip().str.lower() == nombre_ingresado.strip().lower()]
-            if fila.empty:
-                st.error("No se encontró tu nombre en la base de datos.")
-            else:
-                pm = fila.iloc[0]["PM Totales"]
-                st.success(f"Tenés {pm} PM ✨")
+            st.error("Contraseña incorrecta.")
+    else:
+        st.error("Nombre no encontrado.")
+import streamlit as st
+import pandas as pd
+
+@st.cache_data
+def cargar_datos():
+    url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS1L2nRoYBYQPyZXJdhDk0xehT-8fPE1w8pI1T1lZOd84rqdZauUjVo3aEExKYKTD20TOJVvBiC_lza/pub?gid=470759668&single=true&output=csv"
+    df = pd.read_csv(url)
+    df.columns = [col.strip() for col in df.columns]
+    return df
+
+df = cargar_datos()
+
+st.title("Consulta tus PM 💰")
+st.markdown("Ingresá tu nombre y contraseña para ver cuántas PM tenés.")
+st.markdown("**(La contraseña es la que figura en el Excel)**")
+
+nombre_input = st.text_input("Tu nombre (respetá mayúsculas/minúsculas):")
+password_input = st.text_input("Contraseña:", type="password")
+
+if st.button("Consultar"):
+    user_row = df[df['Nombre'] == nombre_input]
+
+    if not user_row.empty:
+        password_real = user_row.iloc[0]['Contraseña']
+        if password_input == password_real:
+            pm = user_row.iloc[0]['PM Totales']
+            st.success(f"Tenés {pm} PM 💸")
+        else:
+            st.error("Contraseña incorrecta.")
+    else:
+        st.error("Nombre no encontrado.")
