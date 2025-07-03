@@ -4,7 +4,7 @@ import pandas as pd
 
 @st.cache_data
 def cargar_datos():
-    url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS1L2nRoYBYQPyZXJdhDk0xehT-8fPE1w8pI1T1lZOd84rqdZauUjVo3aEExKYKTD20TOJVvBiC_lza/pub?gid=470759668&single=true&output=csv"
+    url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS1L2nRoYBYQPyZXJdhDk0xehT-8fPE1w8pI1T1lZOd84rqdZauUjVo3aEExKYKTD20TOJVvBiC_lza/pub?output=csv"
     df = pd.read_csv(url)
     df.columns = [col.strip() for col in df.columns]
     return df
